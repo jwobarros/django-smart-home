@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+
+<h1>{{house_name}}</h1>
+<button onclick='on()'>Ligar</button>
+
+</body>
+
+
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+<script>
+
+function on() {
+
+      $.ajax({
+        url: '{% url "on_off" %}',
+        data: {'command': 'on', 'id': 1},
+	type: 'POST',
+        dataType: 'json',
+        success: function (message) {
+          console.log(message)
+        }
+      });
+}
+</script>
+</html>
