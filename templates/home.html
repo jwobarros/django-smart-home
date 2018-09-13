@@ -79,6 +79,7 @@ function get_audio() {
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.play();
+        uploadAudio(audioBlob);
         });
 
     });
@@ -91,7 +92,7 @@ function stop_audio() {
 function uploadAudio( audio ) {
     var fd = new FormData();
     fd.append('filename', 'audio.wav');
-    fd.append('data', audio);
+    fd.append('file', audio);
     $.ajax({
         type: 'POST',
         url: "{% url 'audio' %}",
