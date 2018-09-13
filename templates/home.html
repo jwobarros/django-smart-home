@@ -7,6 +7,14 @@
 
 <h1>{{house_name}}</h1>
 <button onclick='on()'>Ligar</button>
+<button onclick='off()'>Desligar</button>
+<br>
+<br>
+<br>
+<button onclick='temp_humidity()'>Temperatura e Humidade</button>
+
+<button onclick="get_audio()">gravar</button>             
+<button onclick="stop_audio()">parar</button>
 
 </body>
 
@@ -26,5 +34,41 @@ function on() {
         }
       });
 }
+
+
+function off() {
+
+      $.ajax({
+        url: '{% url "on_off" %}',
+        data: {'command': 'off', 'id': 1},
+        type: 'POST',
+        dataType: 'json',
+        success: function (message) {
+          console.log(message)
+        }
+      });
+}
+
+function temp_humidity() {
+
+      $.ajax({
+        url: '{% url "temperature_humidity" %}',
+        type: 'GET',
+        success: function (message) {
+          console.log(message)
+        }
+      });
+}
+
+
+
+
+var mediaRecorder;                  function get_audio() {                     navigator.mediaDevices.getUserMedia({ audio: true })                     .then(stream => {                         mediaRecorder = new MediaRecorder(stream);                         mediaRecorder.start();                         const audioChunks = [];                      mediaRecorder.addEventListener("dataavailable", event => {                     audioChunks.push(event.data);                      });                      mediaRecorder.addEventListener("stop", () => {                         const audioBlob = new Blob(audioChunks);                         const audioUrl = URL.createObjectURL(audioBlob);                         const audio = new Audio(audioUrl);                         audio.play();                         });                      });                 }                  function stop_audio() {                     mediaRecorder.stop();                 }
+
+
+
+
 </script>
+
+</body>
 </html>
