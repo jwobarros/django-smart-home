@@ -12,7 +12,10 @@
 <br>
 <br>
 <button onclick='temp_humidity()'>Temperatura e Humidade</button>
-<button onclick='record()'>Gravar</button>
+
+<button onclick="get_audio()">gravar</button>             
+<button onclick="stop_audio()">parar</button>
+
 </body>
 
 
@@ -56,43 +59,51 @@ $.ajax({
 });
 }
 
-const recordAudio = () =>
-  new Promise(async resolve => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
-    const audioChunks = [];
+
+var mediaRecorder;
+
+function get_audio() {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+        const audioChunks = [];
 
     mediaRecorder.addEventListener("dataavailable", event => {
-      audioChunks.push(event.data);
+    audioChunks.push(event.data);
+                
     });
 
-    const start = () => mediaRecorder.start();
-
-    const stop = () =>
-      new Promise(resolve => {
-        mediaRecorder.addEventListener("stop", () => {
-          const audioBlob = new Blob(audioChunks);
-          const audioUrl = URL.createObjectURL(audioBlob);
-          const audio = new Audio(audioUrl);
-          const play = () => audio.play();
-          resolve({ audioBlob, audioUrl, play });
+    mediaRecorder.addEventListener("stop", () => {
+        const audioBlob = new Blob(audioChunks);
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audio.play();
         });
 
-        mediaRecorder.stop();
-      });
+    });
+}
 
-    resolve({ start, stop });
-  });
+function stop_audio() {
+  mediaRecorder.stop();
+}
 
-const sleep = time => new Promise(resolve => setTimeout(resolve, time));
-
-async function record() {
-    const recorder = await recordAudio();
-    recorder.start();
-    sleep(5000);
-    const audio = await recorder.stop();
-    audio.play();
+function uploadAudio( audio ) {
+    var fd = new FormData();
+    fd.append('filename', 'audio.wav');
+    fd.append('data', audio);
+    $.ajax({
+        type: 'POST',
+        url: "{% url 'audio' %}",
+        data: fd,
+        processData: false,
+        contentType: false
+    }).done(function(data) {
+          console.log(data);
+    });
 }
 
 </script>
+
+</body>
 </html>
