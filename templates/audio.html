@@ -1,0 +1,37 @@
+<html>
+    <body>
+            <button onclick="get_audio()">gravar</button>
+            <button onclick="stop_audio()">parar</button>
+            <script>
+
+                var mediaRecorder;
+
+                function get_audio() {
+                    navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.start();
+                        const audioChunks = [];
+
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                    audioChunks.push(event.data);
+                                
+                    });
+
+                    mediaRecorder.addEventListener("stop", () => {
+                        const audioBlob = new Blob(audioChunks);
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        const audio = new Audio(audioUrl);
+                        audio.play();
+                        });
+
+                    });
+                }
+
+                function stop_audio() {
+                    mediaRecorder.stop();
+                }
+                    
+            </script>
+    </body>
+</html>

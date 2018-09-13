@@ -7,7 +7,12 @@
 
 <h1>{{house_name}}</h1>
 <button onclick='on()'>Ligar</button>
-
+<button onclick='off()'>Desligar</button>
+<br>
+<br>
+<br>
+<button onclick='temp_humidity()'>Temperatura e Humidade</button>
+<button onclick='record()'>Gravar</button>
 </body>
 
 
@@ -19,12 +24,75 @@ function on() {
       $.ajax({
         url: '{% url "on_off" %}',
         data: {'command': 'on', 'id': 1},
-	type: 'POST',
+        type: 'POST',
         dataType: 'json',
         success: function (message) {
           console.log(message)
         }
       });
 }
+
+function off() {
+
+  $.ajax({
+    url: '{% url "on_off" %}',
+    data: {'command': 'off', 'id': 1},
+    type: 'POST',
+    dataType: 'json',
+    success: function (message) {
+      console.log(message)
+    }
+  });
+}
+
+function temp_humidity() {
+
+$.ajax({
+  url: '{% url "temperature_humidity" %}',
+  type: 'GET',
+  success: function (message) {
+    console.log(message)
+  }
+});
+}
+
+const recordAudio = () =>
+  new Promise(async resolve => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+    const audioChunks = [];
+
+    mediaRecorder.addEventListener("dataavailable", event => {
+      audioChunks.push(event.data);
+    });
+
+    const start = () => mediaRecorder.start();
+
+    const stop = () =>
+      new Promise(resolve => {
+        mediaRecorder.addEventListener("stop", () => {
+          const audioBlob = new Blob(audioChunks);
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          const play = () => audio.play();
+          resolve({ audioBlob, audioUrl, play });
+        });
+
+        mediaRecorder.stop();
+      });
+
+    resolve({ start, stop });
+  });
+
+const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+
+async function record() {
+    const recorder = await recordAudio();
+    recorder.start();
+    sleep(5000);
+    const audio = await recorder.stop();
+    audio.play();
+}
+
 </script>
 </html>
