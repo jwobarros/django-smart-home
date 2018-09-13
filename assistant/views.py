@@ -52,12 +52,11 @@ def TemperatureHumidityView(request):
             return JsonResponse(data, safe=False)
 
 
-
-
+@csrf_exempt
 def AudioView(request):
 
     if request.is_ajax() and request.method == "POST":
-        audio = request.FILES['audio']
+        audio = request.FILES
         print(audio)
         return JsonResponse('Foi porra', safe=False)
     raise Http404
