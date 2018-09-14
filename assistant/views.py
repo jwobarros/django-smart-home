@@ -6,6 +6,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse, Http404
 from os import system
 
+import speech_recognition as sr
+import wave
+
 from assistant.models import RadioFrequencyRelay
 
 #Temperature and Humidity Sensor Library
@@ -56,8 +59,31 @@ def TemperatureHumidityView(request):
 def AudioView(request):
 
     if request.is_ajax() and request.method == "POST":
-        audio = request.FILES
-        print(audio)
+        audio = request.FILES['file'].read()
+
+        r = sr.Recognizer()
+
+        with wave.open("test.wav", "w") as audio_data:
+            audio_data.setnchannels(2)
+            audio_data.setsampwidth(2)
+            audio_data.setframerate(48000.0)
+            audio_data.setnframes(audio_data.getnframes())
+            audio_data.writeframesraw(audio)
+            #audio_data.writeframes(audio)
+            print(audio_data.getnframes()) 
+
+        with sr.AudioFile("test.wav") as source:
+            audio = r.listen(source)
+
+        data = ""
+        try:
+            data = r.recognize_google(audio, language="pt-BR")
+            print("data")
+        except sr.UnknownValueError:
+            print("Não entendi.")
+        except sr.RequestError as e:
+            print("Sem resultados da API do Google")
+
         return JsonResponse('Foi porra', safe=False)
     raise Http404
 
